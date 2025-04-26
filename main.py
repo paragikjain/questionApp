@@ -4,14 +4,15 @@ from fastapi.templating import Jinja2Templates
 from pymongo import MongoClient
 from fastapi.responses import JSONResponse
 from starlette.middleware.sessions import SessionMiddleware
+import os
 
 app = FastAPI()
 # Add session middleware (secret key is used to sign the session data)
 app.add_middleware(SessionMiddleware, secret_key="your-secret-key")
 templates = Jinja2Templates(directory="templates")
 
-
-client = MongoClient("mongodb+srv://<username>:<password>@questionform.global.mongocluster.cosmos.azure.com/?tls=true&authMechanism=SCRAM-SHA-256&retrywrites=false&maxIdleTimeMS=120000")
+MONGO_URI = os.environ.get("MONGO_URI")
+client = MongoClient(MONGO_URI)
 db = client["questiondb"]
 users = db["users"]
 questions_collection = db["question"]
