@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+
+{% block title %}Login{% endblock %}
+
+{% block content %}
+<style>
+    .login-container {
+        width: 100%;
+        max-width: 360px;
+        padding: 2rem;
+        background: #fff;
+        border-radius: 1rem;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+        margin: 4rem auto;
+    }
+    .form-control {
+        border-radius: 0.5rem;
+    }
+    .btn-primary {
+        border-radius: 0.5rem;
+    }
+    h3 {
+        font-weight: 600;
+    }
+</style>
+
+<form action="/login" method="post" class="login-container">
+    <h3 class="text-center mb-4">Office Login</h3>
+
+    {% if message %}
+    <div class="alert alert-danger">{{ message }}</div>
+    {% endif %}
+
+    <div class="mb-3">
+        <input type="text" name="email" class="form-control" placeholder="Email address" required>
+    </div>
+    <div class="mb-3">
+        <input type="password" name="password" class="form-control" placeholder="Password" required>
+    </div>
+    <button type="submit" class="btn btn-primary w-100">Sign In</button>
+
+    <p class="text-center mt-3">
+        Don’t have an account? <a href="/register">Register here</a>
+    </p>
+</form>
+{% endblock %}
