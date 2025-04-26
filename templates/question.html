@@ -120,7 +120,7 @@
         {% endfor %}
 
         <div class="d-flex gap-3 justify-content-center">
-            <button type="button" name="actio1" value="save" onclick="saveResponse()" class="btn btn-outline-secondary">Save</button>
+            <button type="button" name="action" value="save" onclick="saveResponse()" class="btn btn-outline-secondary">Save</button>
             <button type="submit" name="action" value="submit" class="btn btn-primary">Submit Answers</button>
         </div>
     </form>
@@ -135,7 +135,7 @@
 
         const data = savedResponse[0].data;
         const submitButton = document.querySelector('button[type="submit"][value="submit"]');
-        const saveButton = document.querySelector('button[type="submit"][value="save"]');
+        const saveButton = document.querySelector('button[type="button"][value="save"]');
 
         if (savedResponse[0].is_submitted) {
             submitButton.disabled = true;

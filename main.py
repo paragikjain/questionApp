@@ -12,6 +12,9 @@ app.add_middleware(SessionMiddleware, secret_key="your-secret-key")
 templates = Jinja2Templates(directory="templates")
 
 MONGO_URI = os.environ.get("MONGO_URI")
+print(MONGO_URI)
+if MONGO_URI is None:
+    raise ValueError("MONGO_URI environment variable not set.")
 client = MongoClient(MONGO_URI)
 db = client["questiondb"]
 users = db["users"]
