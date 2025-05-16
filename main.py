@@ -157,9 +157,10 @@ async def add_comment(request: Request):
     data = await request.json()
     question_id = data["question_id"]
     comment = data["comment"]
+
     # Update MongoDB
     responses.update_one(
-        {"email" : request.session.get("email"), "data.question_id": int(question_id)},
+        {"email" : request.session.get("email"),"application" : request.session.get("application_name"), "data.question_id": int(question_id)},
         {"$push": 
             {"data.$.comments": 
                 {
