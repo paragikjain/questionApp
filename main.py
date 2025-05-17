@@ -4,23 +4,20 @@ from fastapi.templating import Jinja2Templates
 from pymongo import MongoClient
 from fastapi.responses import JSONResponse
 from starlette.middleware.sessions import SessionMiddleware
-import os
+
+# project specific imports
+from db import UsersColl, QuestionsColl, ResponsesColl 
+from admin import admin_router
+
 
 app = FastAPI()
+# Include admin routes
+app.include_router(admin_router)
 # Add session middleware (secret key is used to sign the session data)
 app.add_middleware(SessionMiddleware, secret_key="your-secret-key")
 templates = Jinja2Templates(directory="templates")
 
-MONGO_URI = os.environ.get("MONGO_URI")
-print(MONGO_URI)
-if MONGO_URI is None:
-    raise ValueError("MONGO_URI environment variable not set.")
-client = MongoClient(MONGO_URI)
-db = client["questiondb"]
-users = db["users"]
-questions_collection = db["question"]
-responses = db["responses"]
-save = db["save"]
+
 
 # GET METHODS
 @app.get("/", response_class=HTMLResponse)
@@ -36,8 +33,8 @@ def questionPage(request: Request):
     if not request.session.get("email"):
         return RedirectResponse(url="/", status_code=303)
     # Fetch all questions from MongoDB
-    questions = questions_collection.find().to_list(100)
-    saved_responses = list(responses.find({"email": request.session.get("email"),"application" : request.session["application_name"] },  {"_id": 0}))
+    questions = QuestionsColl.find().to_list(100)
+    saved_responses = list(ResponsesColl.find({"email": request.session.get("email"),"application" : request.session["application_name"] },  {"_id": 0}))
     return templates.TemplateResponse("question.html", {"request": request, "questions": questions, "saved_responses": saved_responses})    
 
 @app.get("/instructions", response_class=HTMLResponse)
@@ -46,7 +43,7 @@ def instructions(request: Request):
         return RedirectResponse(url="/", status_code=303)
 
     # Fetch app names for this email
-    cursor = responses.find({"email": request.session.get("email")}, {"application": 1, "_id": 0})
+    cursor = ResponsesColl.find({"email": request.session.get("email")}, {"application": 1, "_id": 0})
     appnames = [doc.get("application") for doc in cursor]
 
     return templates.TemplateResponse("instructions.html", {"request": request, "appnames": appnames}) 
@@ -63,7 +60,7 @@ def login_submit(
     email: str = Form(...),
     password: str = Form(...)
 ):
-    user = users.find_one({"email": email, "password": password})
+    user = UsersColl.find_one({"email": email, "password": password})
     if not user:
         # Show error on login page
         return templates.TemplateResponse(
@@ -89,11 +86,11 @@ async def register_submit(request: Request):
     phone = form_data.get("phone")
     password = form_data.get("password")
 
-    existing_user = users.find_one({"email": username})
+    existing_user = UsersColl.find_one({"email": username})
     if existing_user:
         return templates.TemplateResponse("register.html", {"request": request, "message": "User already exists."})
 
-    users.insert_one({"email": email,"username": username, "title": title, "vendor": vendor, "phone": phone, "password": password})
+    UsersColl.insert_one({"email": email,"username": username, "title": title, "vendor": vendor, "phone": phone, "password": password})
     return templates.TemplateResponse("login.html", {"request": request, "message": "Registration successful! Please log in."})
 
 @app.post("/load-application", response_class=HTMLResponse)
@@ -107,7 +104,7 @@ async def load_application(request: Request, application_name: str = Form(...), 
         request.session["application_name"] = application_name
     email = request.session.get("email")
     
-    existing = responses.find_one({
+    existing = ResponsesColl.find_one({
         "email": email,
         "application": request.session["application_name"]
     })
@@ -120,7 +117,7 @@ async def load_application(request: Request, application_name: str = Form(...), 
     }
 
     if not existing :
-        responses.update_one(
+        ResponsesColl.update_one(
             {"email": email, "application": request.session["application_name"]},
             {"$set": update_data},
             upsert=True
@@ -141,7 +138,7 @@ async def submit_answers(request: Request):
         "is_submitted": is_submitted
     }
 
-    result = responses.update_one(
+    result = ResponsesColl.update_one(
         {"email": email,"application" : request.session.get("application_name")},  # Filter by email
         {"$set": update_data},  # Fields to update
         upsert=True  # Insert if not found
@@ -159,7 +156,7 @@ async def add_comment(request: Request):
     comment = data["comment"]
 
     # Update MongoDB
-    responses.update_one(
+    ResponsesColl.update_one(
         {"email" : request.session.get("email"),"application" : request.session.get("application_name"), "data.question_id": int(question_id)},
         {"$push": 
             {"data.$.comments": 
@@ -177,12 +174,11 @@ async def add_comment(request: Request):
 async def save_response(request: Request):
     data = await request.json()
     response = data["response"]
-    print(responses)
     update_data = {
         "data": response,
         "is_submitted": False
     }
-    result = responses.update_one(
+    result = ResponsesColl.update_one(
         {"email": request.session.get("email"),"application" : request.session.get("application_name")},
         {"$set": update_data},  # Fields to update
         upsert=True  # Insert if not found

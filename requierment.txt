@@ -1,0 +1,7 @@
+Admin panel:
+1. Download option to download responses in excel
+2. Table view of answers marked
+3. search by vendor name/ application name / user name
+4. Chat option with user
+5. email verification via OTP while logging in
+6. Feature to add users to admin panel
