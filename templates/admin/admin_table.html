@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Admin Panel</title>
+  <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+  <style>
+    table {
+      width: 100%;
+      margin-top: 20px;
+    }
+    thead input {
+      width: 100%;
+      box-sizing: border-box;
+    }
+  </style>
+</head>
+<body>
+  <h2>Responses Table</h2>
+
+  <table id="responsesTable" class="display">
+    <thead>
+      <tr>
+        <th>Email</th>
+        <th>Application</th>
+        <th>Is Submitted</th>
+        <th>Answers (Preview)</th>
+      </tr>
+      <!-- Filter row -->
+      <tr>
+        <th><input type="text" placeholder="Search email" /></th>
+        <th><input type="text" placeholder="Search application" /></th>
+        <th><input type="text" placeholder="true / false" /></th>
+        <th><input type="text" placeholder="Search answers" /></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for row in data %}
+        <tr>
+          <td>{{ row.email }}</td>
+          <td>{{ row.application }}</td>
+          <td>{{ row.is_submitted }}</td>
+          <td>
+            <ul>
+              {% for q in row.data %}
+                <li><strong>Q{{ q.question_id }}:</strong> {{ q.answer }}</li>
+              {% endfor %}
+            </ul>
+          </td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+  <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+  <script>
+    $(document).ready(function () {
+      // Setup - add a text input to each footer cell
+      $('#responsesTable thead tr:eq(1) th').each(function (i) {
+        $('input', this).on('keyup change', function () {
+          if (table.column(i).search() !== this.value) {
+            table
+              .column(i)
+              .search(this.value)
+              .draw();
+          }
+        });
+      });
+
+      var table = $('#responsesTable').DataTable({
+        orderCellsTop: true,
+        fixedHeader: true,
+        paging: true,
+        ordering: true
+      });
+    });
+  </script>
+</body>
+</html>
