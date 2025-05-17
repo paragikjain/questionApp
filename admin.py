@@ -11,10 +11,12 @@ templates = Jinja2Templates(directory="templates/admin")
 def get_dashboard(request: Request):
     # Fetch all documents from responses collection
     response_docs = list(ResponsesColl.find({}))
-
+    print("Response documents fetched from MongoDB:", response_docs)
     # Convert ObjectId to string for JSON
     for doc in response_docs:
         doc["_id"] = str(doc["_id"])
+        doc["total_weight"] = sum(item.get("weight", 0) for item in doc.get("data", []))
+
 
     return templates.TemplateResponse("admin_table.html", {
         "request": request,

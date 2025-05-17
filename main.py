@@ -71,6 +71,7 @@ def login_submit(
     # Save session
     request.session["email"] = user["email"]
     request.session["username"] = user["username"]
+    request.session["vendor"] = user["vendor"]
 
     # Redirect to questions
     return RedirectResponse(url="/instructions", status_code=303)
@@ -111,6 +112,7 @@ async def load_application(request: Request, application_name: str = Form(...), 
     update_data = {
         "email": email,
         "application": request.session["application_name"],
+        "vendor": request.session["vendor"],
         "data": [],
         "is_submitted": False
     }

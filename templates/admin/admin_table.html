@@ -20,24 +20,33 @@
   <table id="responsesTable" class="display">
     <thead>
       <tr>
+        <!-- Table Header Columns -->
         <th>Email</th>
         <th>Application</th>
+        <th>Vendor</th>
+        <th>Total Score</th>
         <th>Is Submitted</th>
         <th>Answers (Preview)</th>
       </tr>
-      <!-- Filter row -->
       <tr>
+        <!-- Filter inputs for each column -->
         <th><input type="text" placeholder="Search email" /></th>
         <th><input type="text" placeholder="Search application" /></th>
+        <th><input type="text" placeholder="Search vendor" /></th>
+        <th><input type="text" placeholder="Total Score" /></th>
         <th><input type="text" placeholder="true / false" /></th>
         <th><input type="text" placeholder="Search answers" /></th>
       </tr>
     </thead>
+
     <tbody>
+      <!-- Dynamically populated rows from server-side -->
       {% for row in data %}
         <tr>
           <td>{{ row.email }}</td>
           <td>{{ row.application }}</td>
+          <td>{{ row.vendor }}</td>
+          <td>{{ row.total_weight}}</td>
           <td>{{ row.is_submitted }}</td>
           <td>
             <ul>
@@ -51,11 +60,20 @@
     </tbody>
   </table>
 
+  <!-- jQuery and DataTables scripts -->
   <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
   <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
   <script>
     $(document).ready(function () {
-      // Setup - add a text input to each footer cell
+      // Initialize DataTable with sorting, filtering, paging
+      var table = $('#responsesTable').DataTable({
+        orderCellsTop: true,
+        fixedHeader: true,
+        paging: true,
+        ordering: true
+      });
+
+      // Apply column-wise search based on input values
       $('#responsesTable thead tr:eq(1) th').each(function (i) {
         $('input', this).on('keyup change', function () {
           if (table.column(i).search() !== this.value) {
@@ -65,13 +83,6 @@
               .draw();
           }
         });
-      });
-
-      var table = $('#responsesTable').DataTable({
-        orderCellsTop: true,
-        fixedHeader: true,
-        paging: true,
-        ordering: true
       });
     });
   </script>
