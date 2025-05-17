@@ -97,7 +97,6 @@ async def register_submit(request: Request):
 async def load_application(request: Request, application_name: str = Form(...), application_name_text: str = Form(...)):
     if not request.session.get("email"):
         raise HTTPException(status_code=401, detail="Not logged in")
-    print(application_name, application_name_text)
     if application_name == "new_app_name":
         request.session["application_name"] = application_name_text
     else:
@@ -189,17 +188,13 @@ async def save_response(request: Request):
 
 # Utility functions from here
 def build_data(form_data):
-    print(form_data)
     data = []
     for key, value in form_data.items():
-        print(key, value)
         if key.startswith('question_'):  # If the key represents a question answer
             question_id = key.split('_')[1]  # Extract question ID from the key
             question = form_data.get(f"question_{question_id}")  # Get the question text
-            print("question")
             # if it is text based question let's insert here itself 
             if 'text' in key:
-                print("text")
                 question_id = key.split('_')[2] 
                 question = form_data.get(f"question_{question_id}") 
                 answer = form_data.get(f"question_text_{question_id}")
@@ -210,14 +205,12 @@ def build_data(form_data):
                 })
                 continue
         elif key.startswith('option_'):
-            print("option")
             option = form_data.get(f"option_{question_id}")  # Check if an option is selected
             option_value, option_weight = option.split('|')
             weight = int(option_weight)
             answer = option_value
         elif key.startswith('additionalinfo_'):
             additional_info = form_data.get(f"additionalinfo_{question_id}")
-            print("additionalinfo")
             data.append({
                 "question_id": int(question_id),
                 "question": question,
